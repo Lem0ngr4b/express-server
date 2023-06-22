@@ -3,7 +3,7 @@ const app = express();
 
 // Ruta para obtener la lista de tareas
 app.get("/tasks", (req, res) => {
-  // Aquí se degine el arreglo de tareas
+  // Aquí se define el arreglo de tareas
   const tasks = [
     {
       id: "123456",
