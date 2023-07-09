@@ -1,33 +1,25 @@
-const express = require("express");
+const express = require('express');
+const listViewRouter = require('./list-view-router');
+const listEditRouter = require('./list-edit-router');
+
 const app = express();
 
-// Ruta para obtener la lista de tareas
-app.get("/tasks", (req, res) => {
-  // Aquí se degine el arreglo de tareas
-  const tasks = [
-    {
-      id: "123456",
-      isCompleted: false,
-      description: "Walk the dog",
-    },
-    {
-      id: "789012",
-      isCompleted: true,
-      description: "Buy groceries",
-    },
-    {
-      id: "345678",
-      isCompleted: false,
-      description: "Finish homework",
-    },
-  ];
+// Middleware para analizar el cuerpo de las solicitudes como JSON
+app.use(express.json());
 
-  // Envía el arreglo de tareas como respuesta en formato JSON
-  res.json(tasks);
+// Rutas principales
+app.use('/list-view', listViewRouter);
+app.use('/list-edit', listEditRouter);
+
+// Ruta de inicio
+app.get('/', (req, res) => {
+  res.send('¡Bienvenido a la aplicación de tareas!');
 });
 
-// Inicia el servidor
+// Puerto en el que se ejecutará el servidor
 const port = 3000;
+
+// Iniciar el servidor
 app.listen(port, () => {
-  console.log(`Servidor Express iniciado en el puerto ${port}`);
+  console.log(`Servidor iniciado en el puerto ${port}`);
 });
