@@ -1,33 +1,32 @@
-const express = require("express");
+const express = require('express');
 const app = express();
 
-// Ruta para obtener la lista de tareas
-app.get("/tasks", (req, res) => {
-  // Aquí se define el arreglo de tareas
-  const tasks = [
-    {
-      id: "123456",
-      isCompleted: false,
-      description: "Walk the dog",
-    },
-    {
-      id: "789012",
-      isCompleted: true,
-      description: "Buy groceries",
-    },
-    {
-      id: "345678",
-      isCompleted: false,
-      description: "Finish homework",
-    },
-  ];
+// Middleware para gestionar los métodos HTTP válidos
+const validateHTTPMethods = (req, res, next) => {
+  const validMethods = ['GET', 'POST', 'PUT', 'DELETE'];
+  if (!validMethods.includes(req.method)) {
+    return res.status(405).json({ error: 'Método HTTP no permitido' });
+  }
+  next();
+};
 
-  // Envía el arreglo de tareas como respuesta en formato JSON
-  res.json(tasks);
-});
+// Importar el router de list-view
+const listViewRouter = require('./list-view-router');
+// Importar el router de list-edit
+const listEditRouter = require('./list-edit-router');
 
-// Inicia el servidor
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Servidor Express iniciado en el puerto ${port}`);
+// Utilizar el middleware para validar los métodos HTTP
+app.use(validateHTTPMethods);
+
+// Utilizar el middleware para analizar el cuerpo de la solicitud como JSON
+app.use(express.json());
+
+// Registrar los routers en la aplicación
+app.use('/list/view', listViewRouter);
+app.use('/list/edit', listEditRouter);
+
+
+// Iniciar el servidor
+app.listen(3000, () => {
+  console.log('Servidor iniciado en el puerto 3000');
 });
