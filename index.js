@@ -31,11 +31,7 @@ const validateToken = (req, res, next) => {
 
 // Ruta protegida (GET /protected)
 app.get('/protected', validateToken, (req, res) => {
-  // Obtener el usuario desde req.user (decodificado del token JWT)
   const { userId } = req.user;
-
-  // Realizar acciones protegidas
-  // ...
 
   res.json({ message: 'Ruta protegida. Acceso autorizado.' });
 });
