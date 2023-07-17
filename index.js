@@ -1,33 +1,57 @@
-const express = require("express");
+const express = require('express');
+const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Cargar las variables de entorno del archivo .env
 const app = express();
 
-// Ruta para obtener la lista de tareas
-app.get("/tasks", (req, res) => {
-  // Aquí se define el arreglo de tareas
-  const tasks = [
-    {
-      id: "123456",
-      isCompleted: false,
-      description: "Walk the dog",
-    },
-    {
-      id: "789012",
-      isCompleted: true,
-      description: "Buy groceries",
-    },
-    {
-      id: "345678",
-      isCompleted: false,
-      description: "Finish homework",
-    },
-  ];
+// Middleware para analizar el cuerpo de la solicitud como JSON
+app.use(express.json());
 
-  // Envía el arreglo de tareas como respuesta en formato JSON
-  res.json(tasks);
+// Middleware para la validación del token JWT
+const validateToken = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Acceso no autorizado. No se proporcionó el token.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Acceso no autorizado. Token expirado.' });
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Acceso no autorizado. Token inválido.' });
+    } else {
+      return res.status(401).json({ error: 'Acceso no autorizado. Error en la verificación del token.' });
+    }
+  }
+};
+
+// Ruta protegida (GET /protected)
+app.get('/protected', validateToken, (req, res) => {
+  // Obtener el usuario desde req.user (decodificado del token JWT)
+  const { userId } = req.user;
+
+  // Realizar acciones protegidas
+  // ...
+
+  res.json({ message: 'Ruta protegida. Acceso autorizado.' });
 });
 
-// Inicia el servidor
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Servidor Express iniciado en el puerto ${port}`);
+// Ruta de manejo de errores
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).json({ error: 'Acceso no autorizado. Token no válido.' });
+  }
+
+  res.status(500).json({ error: 'Error interno del servidor.' });
+});
+
+// Iniciar el servidor
+app.listen(3000, () => {
+  console.log('Servidor iniciado en el puerto 3000');
 });
